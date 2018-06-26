@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<!--
+*****南京汉图信息技术有限公司- 新技术研发中心 地图平台*****
+--package-time-inject-here--
+-->
+<!--[if IE 8]>
+<html lang="en" class="ie8 no-js" data-ng-app="GISMapFrontendApp"> <![endif]-->
+<!--[if IE 9]>
+<html lang="en" class="ie9 no-js" data-ng-app="GISMapFrontendApp"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en" data-ng-app="GISMapFrontendApp">
+<!--<![endif]-->
+<!-- BEGIN HEAD -->
+
+<head>
+    <title data-ng-bind="'地图平台 | ' + $state.current.data.pageTitle"></title>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta
+        content="width=device-width,target-densitydpi=high-dpi,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        name="viewport"/>
+    <meta content="南京汉图地图平台" name="description"/>
+    <meta content="汉图-新技术研发中心" name="author"/>
+
+    <!-- inject:css -->
+    <!-- inject:css:here -->
+    <!-- endinject -->
+
+
+    <link id="ng_load_css_plugins_before"/>
+    <link rel="shortcut icon" href="favicon.ico"/>
+</head>
+<!-- END HEAD -->
+<!-- BEGIN BODY -->
+
+<body ng-controller="AppController" class="page-on-load"
+      ng-class="{'page-content-white': settings.layout.pageContentWhite,'page-container-bg-solid': settings.layout.pageBodySolid, 'page-sidebar-closed': settings.layout.pageSidebarClosed}">
+<!-- BEGIN PAGE SPINNER -->
+<div ng-spinner-bar class="page-spinner-bar">
+    <div class="bounce1"></div>
+    <div class="bounce2"></div>
+    <div class="bounce3"></div>
+</div>
+<!-- END PAGE SPINNER -->
+<div ui-view="root">
+</div>
+
+
+
+<!-- inject:js -->
+<!-- inject:js:here -->
+<!-- endinject -->
+
+<link id="ng_load_js_plugins_before"/>
+
+<!-- END JAVASCRIPTS -->
+
+</body>
+<!-- END BODY -->
+
+</html>

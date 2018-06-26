@@ -1,0 +1,127 @@
+@charset "UTF-8";
+//px2px
+@mixin px2px($name, $px) {
+    @if (data-dpr="1") {
+        [data-dpr="1"] & {
+            #{$name}: round($px / 2) * 1px;
+        }
+    }
+    @if (data-dpr="1.5") {
+        [data-dpr="1.5"] & {
+            #{$name}: round($px * 1.5 / 2)* 1px;
+        }
+    }
+    @if (data-dpr="2") {
+        [data-dpr="2"] & {
+            #{$name}: $px * 1px;
+        }
+    }
+    @if (data-dpr="2.5") {
+        [data-dpr="2.5"] & {
+            #{$name}: round($px * 2.5 / 2) * 1px;
+        }
+    }
+    @if (data-dpr="2.75") {
+        [data-dpr="2.75"] & {
+            #{$name}: round($px * 2.75 / 2) * 1px;
+        }
+    }
+    @if (data-dpr="3") {
+        [data-dpr="3"] & {
+            #{$name}: round($px / 2 * 3) * 1px
+        }
+    }
+    @if (data-dpr="4") {
+        [data-dpr="4"] & {
+            #{$name}: $px * 2px;
+        }
+    }
+}
+
+//px2rem
+@mixin px2rem($name, $px) {
+    #{$name}: round($px / 10) * 1rem;
+}
+
+$designWidth: 750 !default;
+$designHeight: 1334 !default;
+
+@function rem($n) {
+    //@return $n / (750)*100+rem;
+    @return $n / 375 * 2 * 1rem;
+}
+
+@function px2vw($n) {
+    //@return $n / (750)*100+rem;
+    @return $n / $designWidth *100vw;
+}
+
+@function px2vh($n) {
+    //@return $n / (750)*100+rem;
+    @return $n / $designHeight *100vh;
+}
+
+@function getTop($n) {
+    @return ($n - 1206 / 2) / (750 / 16)+rem;
+}
+
+@function getLeft($n) {
+    @return ($n - 750 / 2) / (750 / 16)+rem;
+}
+
+@function getRight($n) {
+    @return (($n - 750) / 2) / (750 / 16)+rem;
+}
+
+@mixin center($left, $top) { //左右居中 上边
+    position: absolute;
+    left: 50%;
+    top: rem($top);
+    margin: 0 0 0 getLeft($left);
+}
+
+@mixin centerlt($left, $top) { //上下，左右居中
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: getTop($top) 0 0 getLeft($left);
+}
+
+@mixin centerrt($right, $top) { //上下，左右居中
+    position: absolute;
+    right: 50%;
+    top: 50%;
+    margin: getTop($top) getRight($right) 0 0;
+}
+
+@mixin middlert($right, $top) { //上下居中 右边
+    position: absolute;
+    right: rem($right);
+    top: 50%;
+    margin: getTop($top) 0 0 0;
+}
+
+@mixin centerb($left, $bottom) { //左右居中 下边
+    position: absolute;
+    left: 50%;
+    bottom: rem($bottom);
+    margin: 0 0 0 getLeft($left);
+}
+
+@mixin leftTop($left, $top) { //左边 上边
+    position: absolute;
+    left: rem($left);
+    top: rem($top);
+}
+
+@mixin rightTop($right, $top) { //右边 上边
+    position: absolute;
+    right: rem($right);
+    top: rem($top);
+}
+
+@mixin leftBottom($left, $bottom) { //右边 上边
+    position: absolute;
+    left: rem($left);
+    bottom: rem($bottom);
+}

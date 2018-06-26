@@ -1,22 +1,38 @@
 'use strict';
 
 var notify = require("gulp-notify");
-var argv = require('yargs').argv;
+var gutil = require('gulp-util');
 
-module.exports = function() {
+function reportError(error) {
+    var lineNumber = (error.lineNumber) ? 'LINE ' + error.lineNumber + ' -- ' : '';
 
-    var args = Array.prototype.slice.call(arguments);
-    var notification = argv.notification === undefined ? true : argv.notification;
-    // Send error to notification center with gulp-notify
-    if(notification) {
-        notify.onError({
-            title:    "JHipster Gulp Build",
-            subtitle: "Failure!",
-            message:  "Error: <%= error.message %>",
-            sound:    "Beep"
-        }).apply(this, args);
+    notify({
+        title: '编译失败 [' + error.plugin + ']',
+        message: lineNumber + '具体错误请看控制台！',
+        sound: 'Sosumi' // See: https://github.com/mikaelbr/node-notifier#all-notification-options-with-their-defaults
+    }).write(error);
+
+    gutil.beep();
+
+    // Pretty error reporting
+    var report = '';
+    var chalk = gutil.colors.white.bgRed;
+
+    report += chalk('TASK:') + ' [' + error.plugin + ']\n';
+    report += chalk('PROB:') + ' ' + error.message + '\n';
+    if (error.lineNumber) {
+        report += chalk('LINE:') + ' ' + error.lineNumber + '\n';
     }
-    // Keep gulp from hanging on this task
+    if (error.fileName) {
+        report += chalk('FILE:') + ' ' + error.fileName + '\n';
+    }
+    console.error(report);
+
+    // Prevent the 'watch' task from stopping
     this.emit('end');
+}
+
+module.exports = {
+    reportError: reportError
 
 };

@@ -1,81 +1,183 @@
 'use strict';
 
 var gulp = require('gulp'),
-    rev = require('gulp-rev'),
-    plumber = require('gulp-plumber'),
-    es = require('event-stream'),
-    flatten = require('gulp-flatten'),
-    replace = require('gulp-replace'),
-    bowerFiles = require('main-bower-files'),
-    changed = require('gulp-changed');
+    fs = require('fs'),
+    fse = require('fs-extra'),
+    mapStream = require('map-stream'),
+    walkSync = require('walk-sync'),
+
+    plumber = require('gulp-plumber');
+
 
 var handleErrors = require('./handle-errors');
 var config = require('./config');
+var log = require('fancy-log');
+var util = require('./utils');
+var coreConf = require('./project-common');
+var path = require('path');
+var manifestHelper = require('./manifest-helper');
 
 module.exports = {
-    fonts: fonts,
-    common: common,
-    swagger: swagger,
-    images: images
+    copyByModule: copyByModule,
+    copyAssets: copyAssets,
+    copyTmpRev: copyTmpRev,
+    copyIndex: copyIndex,
+    copyChangedRev: copyChangedRev,
+    copyChangedDist: copyChangedDist
+};
+
+
+function copyByModule() {
+
+    var filesToCopy = util.normalFilesInModules();
+    // log(filesToCopy);
+    return gulp.src(filesToCopy, {base: config.webappDir})
+        .pipe(plumber({errorHandler: handleErrors.reportError}))
+        .pipe(gulp.dest(config.tmp));
 }
 
-function fonts() {
-    return es.merge(gulp.src(config.bower + 'bootstrap/fonts/*.*')
-        .pipe(plumber({errorHandler: handleErrors}))
-        .pipe(changed(config.dist + 'content/fonts/'))
-        .pipe(rev())
-        .pipe(gulp.dest(config.dist + 'content/fonts/'))
-        .pipe(rev.manifest(config.revManifest, {
-            base: config.dist,
-            merge: true
-        }))
-        .pipe(gulp.dest(config.dist)),
-        gulp.src(config.app + 'content/**/*.{woff,woff2,svg,ttf,eot,otf}')
-        .pipe(plumber({errorHandler: handleErrors}))
-        .pipe(changed(config.dist + 'content/fonts/'))
-        .pipe(flatten())
-        .pipe(rev())
-        .pipe(gulp.dest(config.dist + 'content/fonts/'))
-        .pipe(rev.manifest(config.revManifest, {
-            base: config.dist,
-            merge: true
-        }))
-        .pipe(gulp.dest(config.dist))
-    );
-}
 
-function common() {
-    return gulp.src([config.app + 'robots.txt', config.app + 'favicon.ico', config.app + '.htaccess'], { dot: true })
-        .pipe(plumber({errorHandler: handleErrors}))
-        .pipe(changed(config.dist))
+function copyAssets() {
+    var filesToCopy = coreConf.commonAssets.map(function (file) {
+        return config.webappDir + file;
+    });
+    var commonIgnore = coreConf.commonIgnore.map(function (file) {
+        return '!' + config.webappDir + file;
+    });
+
+    var env = util.getEnv();
+    var modules = env.modules;
+    var confCommon = require('./project-common');
+    var assetsFiles;
+
+    assetsFiles = confCommon.coreCss
+        .concat(confCommon.coreJs);
+
+    modules.forEach(function (m) {
+        var confModule = require('./project-' + m.name);
+        assetsFiles = assetsFiles.concat(confModule.venderJs)
+            .concat(confModule.venderCss)
+            .concat(confModule.venderAssets || []);
+        assetsFiles.push('assets/pages/' + m.name + '/**/*');
+
+    });
+
+    assetsFiles = assetsFiles
+        .filter(function (file) {
+            return file.startsWith('assets/') || file.startsWith('bower_components/');
+        })
+        .reduce(function (r, item) {
+            //去重
+            r[config.webappDir + item] = item;
+            return r;
+        }, {});
+
+    filesToCopy = filesToCopy
+        .concat(Object.keys(assetsFiles))
+        .concat(commonIgnore);
+
+    log(filesToCopy);
+    return gulp.src(filesToCopy, {base: config.webappDir})
+        .pipe(plumber({errorHandler: handleErrors.reportError}))
         .pipe(gulp.dest(config.dist));
 }
 
-function swagger() {
-    return es.merge(
-        gulp.src([config.bower + 'swagger-ui/dist/**',
-             '!' + config.bower + 'swagger-ui/dist/index.html',
-             '!' + config.bower + 'swagger-ui/dist/swagger-ui.min.js',
-             '!' + config.bower + 'swagger-ui/dist/swagger-ui.js'])
-            .pipe(plumber({errorHandler: handleErrors}))
-            .pipe(changed(config.swaggerDist))
-            .pipe(gulp.dest(config.swaggerDist)),
-        gulp.src(config.app + 'swagger-ui/index.html')
-            .pipe(plumber({errorHandler: handleErrors}))
-            .pipe(changed(config.swaggerDist))
-            .pipe(replace('../bower_components/swagger-ui/dist/', ''))
-            .pipe(replace('swagger-ui.js', 'lib/swagger-ui.min.js'))
-            .pipe(gulp.dest(config.swaggerDist)),
-        gulp.src(config.bower  + 'swagger-ui/dist/swagger-ui.min.js')
-            .pipe(plumber({errorHandler: handleErrors}))
-            .pipe(changed(config.swaggerDist + 'lib/'))
-            .pipe(gulp.dest(config.swaggerDist + 'lib/'))
-    );
+
+function copyTmpRev() {
+    var f = [config.tmp + 'rev/**/*'];
+    return gulp.src(f)
+        .pipe(gulp.dest(config.dist + 'app/'));
 }
 
-function images() {
-    return gulp.src(bowerFiles({filter: ['**/*.{gif,jpg,png}']}), { base: config.bower })
-        .pipe(plumber({errorHandler: handleErrors}))
-        .pipe(changed(config.dist +  'bower_components'))
-        .pipe(gulp.dest(config.dist +  'bower_components'));
+function copyIndex() {
+    var f = config.dist + 'index.html';
+    log('正在复制 ' + f + ' 到 ', config.webTargetDir);
+    var env = util.getEnv();
+    return gulp.src(f)
+        .pipe(mapStream(function (file, cb) {
+            var dFile = file.path.split(path.sep).join('/').replace(config.dist, config.webTargetDir + env.projectName + '-' + env.projectVersion + '/');
+            if (fs.existsSync(dFile)) {
+                log('删除旧文件', dFile);
+                fs.unlinkSync(dFile);
+            }
+            cb(null, file);
+        }))
+        .pipe(gulp.dest(config.webTargetDir + env.projectName + '-' + env.projectVersion));
+}
+
+function copyChangedRev() {
+
+    var revFiles = manifestHelper.compareManifest();
+    log('copy-changed-rev', revFiles);
+
+
+    revFiles.toDelete.forEach(function (f) {
+        log('del', f);
+        fse.removeSync(f);
+    });
+    revFiles.toAdd.forEach(function (f) {
+        var n = f.split(path.sep).join('/');
+        if (fse.existsSync(f)) {
+            log('add', n);
+            fse.copySync(f, n.replace(config.tmp + 'rev/', config.dist + 'app/'));
+        } else {
+            log('skip add', n);
+        }
+    });
+
+}
+
+
+function copyChangedDist() {
+    var env = util.getEnv();
+
+    var distFiles = walkSync(config.dist, {directories: false, ignore: ['WEB-INF', 'META-INF']});
+    var targetPath = config.webTargetDir + env.projectName + '-' + env.projectVersion + '/';
+    var targetFiles = walkSync(targetPath, {directories: false, ignore: ['WEB-INF', 'META-INF']});
+
+    distFiles = distFiles.reduce(function (r, file) {
+        r[file] = file;
+        return r;
+    }, {});
+    targetFiles = targetFiles.reduce(function (r, file) {
+        r[file] = file;
+        return r;
+    }, {});
+    var toAdd = [], toDel = [];
+    for (var file in distFiles) {
+        if (distFiles[file] !== targetFiles[file]) {
+            toAdd.push(file);
+            targetFiles[file] && toDel.push(targetFiles[file]);
+        }
+        delete  distFiles[file];
+        delete  targetFiles[file];
+    }
+    toAdd = toAdd
+        .concat(Object.keys(distFiles))
+        .map(function (f) {
+            return config.dist + f;
+        });
+    toDel = toDel
+        .concat(Object.keys(targetFiles))
+        .map(function (f) {
+            return targetPath + f;
+        });
+
+    toDel.forEach(function (f) {
+        if (fse.existsSync(f)) {
+            log('del', f);
+            fse.removeSync(f);
+        } else {
+            log('skip del', f);
+        }
+    });
+    toAdd.forEach(function (f) {
+        if (fse.existsSync(f)) {
+            log('add', f);
+            fse.copySync(f, f.replace(config.dist, targetPath));
+        } else {
+            log('skip add', f);
+        }
+    });
+
 }

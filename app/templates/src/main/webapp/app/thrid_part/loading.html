@@ -1,0 +1,21 @@
+<style>
+    .loading {
+        position: absolute;
+        width: 360px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        -webkit-transform: translate(-50%, -50%);
+        -moz-transform: translate(-50%, -50%);
+        -o-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+    }
+</style>
+<div ng-cloak>
+    <img class="loading" src="assets/global/img/loading.gif" alt="">
+    <div class="col-md-12">
+        <div class="alert alert-error">
+            <span style="font-size: larger"> {{vm.message}} </span>
+        </div>
+    </div>
+</div>

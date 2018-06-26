@@ -1,5 +1,20 @@
-<div ng-cloak>
-    <div class="row">
-        <h1><%= projectName %>主页</h1>
+<nav class="navbar navbar-default header" style="background: #414141;color: #fff">
+    <div class="container-fluid">
+        <h2>地图平台-全域版</h2>
+    </div>
+
+</nav>
+<div class="well-lg" ng-cloak>
+    <div class="row" ng-repeat="(k,v) in vm.allPageInfo">
+        <div ng-class="k1==0?'col-md-2 col-sm-6 col-md-offset-2':'col-md-2 col-sm-6'"  ng-repeat="(k1,v1) in v">
+            <div class="gallery-item">
+                <a href={{v1.href}}>
+                    <img ng-src={{v1.src}} alt="image">
+                    <div class="content-gallery">
+                        <h3>{{v1.name}}</h3>
+                    </div>
+                </a>
+            </div>
+        </div>
     </div>
 </div>

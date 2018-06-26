@@ -2,7 +2,7 @@
     'use strict';
 
     angular
-        .module('<%= projectName %>App')
+        .module('GISMapFrontendApp')
         .config(stateConfig);
 
     stateConfig.$inject = ['$stateProvider'];
@@ -15,7 +15,7 @@
                 pageTitle: '主页'
             },
             views: {
-                'content@': {
+                'root@': {
                     templateUrl: 'app/home/home.html',
                     controller: 'HomeController',
                     controllerAs: 'vm'
@@ -24,12 +24,21 @@
             resolve:{
                 loadCtrl: ['$ocLazyLoad', function ($ocLazyLoad) {
                     return $ocLazyLoad.load({
+                        serie:true,
                         insertBefore: '#ng_load_js_plugins_before', // load js  css files before a LINK element with this ID.
                         files: [
                             'app/home/home.controller.js'
                         ]
                     });
                 }],
+                loadCss: ['$ocLazyLoad', function ($ocLazyLoad) {
+                    return $ocLazyLoad.load({
+                        insertBefore: '#ng_load_css_plugins_before', // load js  css files before a LINK element with this ID.
+                        files: [
+                            'app/home/home.all.css'
+                        ]
+                    });
+                }]
             }
         });
     }

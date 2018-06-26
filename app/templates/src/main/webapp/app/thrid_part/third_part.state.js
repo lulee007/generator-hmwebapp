@@ -1,3 +1,8 @@
+/**
+ * 创建时间：2017/8/14 下午3:32
+ * 文件：tp.state.js
+ * 创建者：luxiaohui
+ **/
 (function () {
     'use strict';
 
@@ -8,27 +13,26 @@
     stateConfig.$inject = ['$stateProvider'];
 
     function stateConfig($stateProvider) {
-        $stateProvider.state('login', {
+        $stateProvider.state('tp', {
             parent: 'app',
-            url: "/login",
+            url: "/tp?apikey&state&extra",
             views: {
                 "root@": {
-                    templateUrl: "app/login/login.html",
+                    templateUrl: "app/thrid_part/loading.html",
                     controllerAs: 'vm',
-                    controller: "LoginController"
+                    controller: "TPController",
                 }
             },
             data: {
-                pageTitle: '登录'
+                pageTitle: '正在加载...'
             },
             resolve: {
-                loadCtrl: ['$ocLazyLoad', function ($ocLazyLoad) {
+                loadJs: ['$ocLazyLoad', function ($ocLazyLoad) {
                     return $ocLazyLoad.load({
-                        insertBefore: '#ng_load_js_plugins_before', // load js  css files before a LINK element with this ID.
+                        insertBefore: '#ng_load_js_plugins_before',
                         files: [
-                            // <insert all js here>
-                            'app/login/login.all.service.js',
-                            'app/login/login.controller.js'
+                            'app/thrid_part/thrid_part.all.service.js',
+                            'app/thrid_part/tp.controller.js'
                         ]
                     });
                 }],
@@ -36,8 +40,7 @@
                     return $ocLazyLoad.load({
                         insertBefore: '#ng_load_css_plugins_before', // load js  css files before a LINK element with this ID.
                         files: [
-                            // <insert all css here>
-                            'assets/pages/css/login.min.css'
+                            'app/thrid_part/thrid_part.all.css'
                         ]
                     });
                 }]

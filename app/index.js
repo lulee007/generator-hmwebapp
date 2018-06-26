@@ -3,9 +3,6 @@ const Generator = require('yeoman-generator');
 const commandExists = require('command-exists').sync;
 const yosay = require('yosay');
 const chalk = require('chalk');
-const wiredep = require('wiredep');
-const mkdirp = require('mkdirp');
-const _s = require('underscore.string');
 
 module.exports = class extends Generator {
   constructor(args, opts) {
@@ -63,6 +60,10 @@ module.exports = class extends Generator {
           name: 'Datatable',
           value: 'includeDatatable',
           checked: true
+        },{
+          name:'Angular Bootstrap',
+          value: 'isIncludeAB',
+          checked: false
         }]
       }];
 
@@ -84,7 +85,6 @@ module.exports = class extends Generator {
     this._writingPom();
     this._writingAssets();
     this._writingScripts();
-    this._writingHtml();
     this._writingReadme();
 
   }
@@ -120,7 +120,8 @@ module.exports = class extends Generator {
       {
         projectName: this.build.projectName,
         isIncludeWS:this.hasFeature('includeWebsocket'),
-        isIncludeDatatable:this.hasFeature('includeDatatable')
+        isIncludeDatatable:this.hasFeature('includeDatatable'),
+        isIncludeAB:this.hasFeature('isIncludeAB')
       });
     this.fs.copy(
       this.templatePath('bowerrc'),
@@ -169,19 +170,8 @@ module.exports = class extends Generator {
       {
         projectName: this.build.projectName,
         isIncludeWS:this.hasFeature('includeWebsocket'),
-        isIncludeDatatable:this.hasFeature('includeDatatable')
-      }
-    );
-  }
-
-  _writingHtml() {
-    this.fs.copyTpl(
-      this.templatePath(this.templateSrcPath + 'index.html'),
-      this.destinationPath(this.templateSrcPath+'index.html'),
-      {
-        projectName: this.build.projectName,
-        isIncludeWS:this.hasFeature('includeWebsocket'),
-        isIncludeDatatable:this.hasFeature('includeDatatable')
+        isIncludeDatatable:this.hasFeature('includeDatatable'),
+        isIncludeAB:this.hasFeature('isIncludeAB')
       }
     );
   }

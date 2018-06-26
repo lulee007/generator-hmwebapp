@@ -2,68 +2,227 @@
 
 var gulp = require('gulp'),
     plumber = require('gulp-plumber'),
-    inject = require('gulp-inject'),
-    es = require('event-stream'),
-    naturalSort = require('gulp-natural-sort'),
-    angularFilesort = require('gulp-angular-filesort'),
-    bowerFiles = require('main-bower-files');
+    Q = require('q'),
+    fs = require('fs'),
+    injectString = require('gulp-inject-string');
+
+var rename = require("gulp-rename");
+
+var mapStream = require('map-stream');
+var prettify = require('gulp-html-prettify');
+var log = require('fancy-log');
+var path = require('path');
 
 var handleErrors = require('./handle-errors');
+var util = require('./utils');
 
 var config = require('./config');
 
 module.exports = {
-    app: app,
-    vendor: vendor,
-    test: test,
-    troubleshoot: troubleshoot
-}
+    states: states,
+    index: index,
+    homeModule: homeModule
 
-function app() {
-    return gulp.src(config.app + 'index.html')
-        .pipe(inject(gulp.src(config.app + 'app/**/*.js')
-            .pipe(plumber({errorHandler: handleErrors}))
-            .pipe(naturalSort())
-            .pipe(angularFilesort()), {relative: true}))
-        .pipe(gulp.dest(config.app));
-}
+};
 
-function vendor() {
-    var stream = gulp.src(config.app + 'index.html')
+// 根据 config 配置的 项目， 动态注入 第三方组件到index 中
+
+function index() {
+
+    var env = util.getEnv();
+    var pages = env.modules.map(function (m) {
+        return m.name;
+    });
+    var coreConf = require('./project-common');
+    var pomVer = util.parseVersion();
+    // 先 common
+    // 再 project js
+    // 接着 version
+    // 最后 app.xxx.js
+    var deffered = Q.defer();
+    var packageTime = '当前版本号：' + pomVer + ' 打包时间：' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString();
+    var packedPages = pages
+        .filter(function (p) {
+            return coreConf.commonModules.indexOf(p) === -1;
+        });
+    // packedPages.push('index');
+    // var modulesCount = packedPages.length;
+    var modulesCount = packedPages.length + 1;
+    packedPages
+        .forEach(function (page) {
+            gulp.src(config.webappDir + '/template/index.html')
+                .pipe(plumber({errorHandler: handleErrors}))
+                .pipe(mapStream(function (file, cb) {
+                    var html = file.contents.toString();
+                    // 核心组件
+                    var allJs = [].concat(coreConf.coreJs);
+                    var allCss = [].concat(coreConf.coreCss);
+                    // if (page !== 'index') {
+                    var pageConf = require('./project-' + page);
+                    allJs = allJs.concat(pageConf.venderJs);
+                    allCss = allCss.concat(pageConf.venderCss);
+                    // }
+                    var jsList = allJs
+                        .map(function (js) {
+                            return '<script src="' + js + '" type="text/javascript"></script>';
+                        }).join('\r\n');
+                    var cssList = allCss
+                        .map(function (css) {
+                            return '<link rel="stylesheet" href="' + css + '">';
+                        }).join('\r\n');
+
+                    html = html.replace('<!-- inject:css:here -->', cssList);
+                    html = html.replace('<!-- inject:js:here -->', jsList);
+                    file.contents = new Buffer(html, 'utf-8');
+                    var dFile = file.path.split(path.sep).join('/')
+                        .replace(config.webappDir + 'template/', config.tmp)
+                        .replace('index.html', page + '.html');
+                    log(packageTime, dFile);
+                    if (fs.existsSync(dFile)) {
+                        log('删除旧文件', dFile);
+                        fs.unlinkSync(dFile);
+                    }
+                    cb(null, file);
+                }))
+                .pipe(injectString.replace('--package-time-inject-here--', packageTime))
+                .pipe(prettify({indent_char: ' ', indent_size: 2}))
+                .pipe(rename(page + '.html'))
+                .pipe(gulp.dest(config.tmp))
+                .on('end', function () {
+                    modulesCount--;
+                    if (modulesCount <= 0) {
+                        deffered.resolve();
+                    }
+                });
+        });
+
+    gulp.src(config.webappDir + '/template/index.html')
         .pipe(plumber({errorHandler: handleErrors}))
-        .pipe(inject(gulp.src(bowerFiles(), {read: false}), {
-            name: 'bower',
-            relative: true
-        }))
-        .pipe(gulp.dest(config.app));
+        .pipe(mapStream(function (file, cb) {
+            var html = file.contents.toString();
+            // 核心组件
+            var allJs = [].concat(coreConf.coreJs);
+            var allCss = [].concat(coreConf.coreCss);
+            pages.forEach(function (page) {
+                var pageConf = require('./project-' + page);
+                allJs = allJs.concat(pageConf.venderJs);
+                // allCss = allCss.concat(pageConf.venderCss);
+            });
+            allJs = allJs.reduce(function (r, js) {
+                if (r.indexOf(js) > -1) {
+                    log('存在重复js，去重', js);
+                } else {
+                    r.push(js);
+                }
+                return r;
+            }, []);
+            allCss = allCss.reduce(function (r, css) {
+                if (r.indexOf(css) > -1) {
+                    log('存在重复css，去重', css);
+                } else {
+                    r.push(css);
+                }
+                return r;
+            }, []);
+            var jsList = allJs
+                .map(function (js) {
+                    return '<script src="' + js + '" type="text/javascript"></script>';
+                }).join('\r\n');
+            var cssList = allCss
+                .map(function (css) {
+                    return '<link rel="stylesheet" href="' + css + '">';
+                }).join('\r\n');
 
-    return stream;
-}
-
-function test() {
-    return gulp.src(config.test + 'karma.conf.js')
-        .pipe(plumber({errorHandler: handleErrors}))
-        .pipe(inject(gulp.src(bowerFiles({includeDev: true, filter: ['**/*.js']}), {read: false}), {
-            starttag: '// bower:js',
-            endtag: '// endbower',
-            transform: function (filepath) {
-                return '\'' + filepath.substring(1, filepath.length) + '\',';
+            html = html.replace('<!-- inject:css:here -->', cssList);
+            html = html.replace('<!-- inject:js:here -->', jsList);
+            file.contents = new Buffer(html, 'utf-8');
+            var dFile = file.path.split(path.sep).join('/').replace(config.webappDir + 'template/', config.tmp);
+            log(packageTime, dFile);
+            if (fs.existsSync(dFile)) {
+                log('删除旧文件', dFile);
+                fs.unlinkSync(dFile);
             }
+            cb(null, file);
         }))
-        .pipe(gulp.dest(config.test));
+        .pipe(injectString.replace('--package-time-inject-here--', packageTime))
+        .pipe(prettify({indent_char: ' ', indent_size: 2}))
+        .pipe(gulp.dest(config.tmp))
+        .on('end', function () {
+            modulesCount--;
+            if (modulesCount <= 0) {
+                deffered.resolve();
+            }
+        });
+
+    return deffered.promise;
 }
 
-function troubleshoot() {
-    /* this task removes the troubleshooting content from index.html*/
-    return gulp.src(config.app + 'index.html')
-        .pipe(plumber({errorHandler: handleErrors}))
-        /* having empty src as we dont have to read any files*/
-        .pipe(inject(gulp.src('', {read: false}), {
-            starttag: '<!-- inject:troubleshoot -->',
-            removeTags: true,
-            transform: function () {
-                return '<!-- Angular views -->';
+
+
+function homeModule() {
+    var env = util.getEnv();
+    var modules = env.modules;
+    var modulesString = modules.map(function (m) {
+        return m.name;
+    }).join('\',\'');
+    return gulp.src(config.webappDir + 'app/home/home.controller.js', {base: config.webappDir})
+        .pipe(mapStream(function (file, cb) {
+            var state = file.contents.toString();
+            state = state.replace('--inject modules here--', modulesString);
+            log('modulesString', modulesString);
+            file.contents = new Buffer(state, 'utf-8');
+            var oldFile = file.path.split(path.sep).join('/').replace(config.webappDir, config.tmp);
+            if (fs.existsSync(oldFile)) {
+                log('删除旧文件', oldFile);
+                fs.unlinkSync(oldFile);
             }
+            cb(null, file);
         }))
-        .pipe(gulp.dest(config.app));
+        .pipe(gulp.dest(config.tmp));
+
+}
+
+
+/**
+ * 需要在merge state 之前
+ */
+function states() {
+
+    var env = util.getEnv();
+    var modules = env.modules;
+
+    var deferred = Q.defer();
+    var asyncCount = modules.length;
+
+    modules.forEach(function (m) {
+        // var allJs = []；
+        var allCss = [];
+        var dir = m.tmpPath;// repalce to rev
+        var mConf = require('./project-' + m.name);
+        allCss = allCss.concat(mConf.venderCss);
+        gulp.src([dir + '/*' + '.state.js'], {base: './'})
+            .pipe(mapStream(function (file, cb) {
+
+                var state = file.contents.toString();
+                state = state.replace('// <insert all css here>', allCss.map(function (css) {
+                    return '\'' + css + '\',';
+                }).join('\r\n'));
+                file.contents = new Buffer(state, 'utf-8');
+                log('删除旧文件', file.path);
+                fs.unlinkSync(file.path);
+                cb(null, file);
+            }))
+            .pipe(gulp.dest('./'))
+            .on('end', function () {
+                asyncCount--;
+                if (asyncCount <= 0) {
+                    deferred.resolve();
+                } else {
+                    console.log('inject state: ' + dir + '/' + m.name + '.state.js');
+                }
+            });
+
+    });
+    return deferred.promise;
+
 }
