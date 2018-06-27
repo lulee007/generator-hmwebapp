@@ -2,7 +2,7 @@
     'use strict';
 
     angular
-        .module('GISMapFrontendApp')
+        .module('<%= projectName %>App')
         .config(stateConfig);
 
     stateConfig.$inject = ['$stateProvider'];

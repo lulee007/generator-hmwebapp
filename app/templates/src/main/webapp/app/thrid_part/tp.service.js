@@ -7,7 +7,7 @@
     'use strict';
 
     angular
-        .module('GISMapFrontendApp')
+        .module('<%= projectName %>App')
         .factory('TPService', TPService);
 
     TPService.$inject = ['$resource','APP_CONSTANT'];

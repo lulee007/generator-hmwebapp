@@ -13,7 +13,8 @@
     "test": "mocha --reporter spec --timeout 3000"
   },
   "files": [
-    "app"
+    "app",
+    "project"
   ],
   "keywords": [
     "yeoman-generator",

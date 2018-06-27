@@ -12,7 +12,6 @@
            'AUTH_WHITE_LIST':[/http:\/\/xxx/, /http:\/\/xxx:8888\/api\/authenticate/],
            //验证请求地址
         //    'API_TOKEN_URL':'http://xxx:8888/api/authenticate',
-           'STATE_WHITE_LIST': ['404', '403', '500', 'tp'],
-           'TP_STATE_WHITE_LIST': [],
+           'STATE_WHITE_LIST': ['404', '403', '500', 'tp',''],
        });
 })();

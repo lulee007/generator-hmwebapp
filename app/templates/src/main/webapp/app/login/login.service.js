@@ -6,7 +6,7 @@
     'use strict';
 
     angular
-        .module('GISMapFrontendApp')
+        .module('<%= projectName %>App')
         .factory('LOGIN', LOGIN);
 
     LOGIN.$inject = ['$resource','APP_CONSTANT'];

@@ -4,12 +4,16 @@
   "appPath": "src/main/webapp/",
   "testPath": "src/test/javascript/spec",
   "dependencies": {
-    "hm-angularjs-base": "svn+https://dev.handsmap.com:2086/svn/Project_HandsmapDev_Daily/hm-angularjs-base#>=0.1.2"<% if (isIncludeDatatable){%>,
+    "hm-angularjs-base": "svn+https://dev.handsmap.com:2086/svn/Project_HandsmapDev_Daily/hm-angularjs-base#>=0.1.2"
+    <% if (isIncludeDatatable){%>,
     "datatables.net": "^1.10.15",
-    "angular-datatables": "0.6.2"<%}%><% if (isIncludeWS){%>,
+    "angular-datatables": "0.6.2"
+    <%}%>
+    <% if (isIncludeWS){%>,
     "ng-stomp": "^0.4.0"
-    <%}%><% if (isIncludeAB){%>,
-    "angular-bootstrap":"1.3.3",
+    <%}%>
+    <% if (isIncludeAB){%>,
+    "angular-bootstrap":"1.3.3"
     <%}%>
   },
   "devDependencies": {

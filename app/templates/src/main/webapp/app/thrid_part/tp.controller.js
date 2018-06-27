@@ -6,7 +6,7 @@
 (function () {
     'use strict';
     angular
-        .module('GISMapFrontendApp')
+        .module('<%= projectName %>App')
         .controller('TPController', TPController);
     TPController.$inject = ['$scope', '$state', '$stateParams', '$localStorage', 'TPService', 'APP_CONSTANT', '$location'];
 
@@ -52,6 +52,15 @@
                     vm.message = '验证出错:' + data.msg;
                     console.error(vm.message);
                     return;
+                }
+                var params = {};
+                if ($stateParams.extra) {
+                    params = $stateParams.extra.split('@').reduce(function (r, item) {
+                        var kv = item.split('=');
+                        r[kv[0]] = kv[1];
+                        return r;
+                    }, {});
+
                 }
                 console.log('跳转到 ', $stateParams.state, params);
                 $location.search('apikey', null);

@@ -208,8 +208,9 @@ gulp.task('start-browser-sync', function () {
 
     var env = util.getEnv();
     var port = env.port;
-    config.proxyUrl = 'http://localhost:' + port + '/sims-gis-map-frontend/';
-    config.projectName = 'sims-gis-map-frontend';
+    config.projectName = util.parseProjectName();
+    config.proxyUrl = 'http://localhost:' + port + '/'+config.projectName+'/';
+    
     browserSync({
         port: config.port,
         proxy: config.proxyUrl

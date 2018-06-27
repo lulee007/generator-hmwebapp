@@ -85,6 +85,8 @@ module.exports = class extends Generator {
     this._writingPom();
     this._writingAssets();
     this._writingScripts();
+    this._writingIndex();
+    this._writingWeb_INF();
     this._writingReadme();
 
   }
@@ -137,12 +139,23 @@ module.exports = class extends Generator {
   }
 
   _writingPom(){
+    function getKebabCase ( str ) {
+      var arr = str.split('');
+         str = arr.map(function ( item ){
+             if( item.toUpperCase() === item ){
+                 return '-' + item.toLowerCase();
+             }else{
+                 return item;
+             }
+         }).join( '' );
+         return str.substring(1);
+     }
     this.fs.copyTpl(
       this.templatePath('pom.xml'),
       this.destinationPath('pom.xml'),
       {
         groupId: this.build.projectGroupID,
-        projectName: this.build.projectName
+        projectName: getKebabCase(this.build.projectName)
       }
     )
   }
@@ -173,6 +186,23 @@ module.exports = class extends Generator {
         isIncludeDatatable:this.hasFeature('includeDatatable'),
         isIncludeAB:this.hasFeature('isIncludeAB')
       }
+    );
+  }
+
+  _writingIndex() {
+    this.fs.copyTpl(
+      this.templatePath(this.templateSrcPath+ 'template/'),
+      this.destinationPath(this.templateSrcPath+'template/'),
+      {
+        projectName: this.build.projectName
+      }
+    );
+  }
+
+  _writingWeb_INF(){
+    this.fs.copyTpl(
+      this.templatePath(this.templateSrcPath+ 'WEB-INF/'),
+      this.destinationPath(this.templateSrcPath+'WEB-INF/')
     );
   }
 

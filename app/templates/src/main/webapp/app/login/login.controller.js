@@ -2,7 +2,7 @@
     'use strict';
 
     angular
-        .module('GISMapFrontendApp')
+        .module('<%= projectName %>App')
         .controller('LoginController', LoginController);
 
     LoginController.$inject = ['$stateParams', '$state', '$localStorage', '$sessionStorage', '$location', 'APP_CONSTANT', 'LOGIN'];

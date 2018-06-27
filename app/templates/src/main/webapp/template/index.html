@@ -4,11 +4,11 @@
 --package-time-inject-here--
 -->
 <!--[if IE 8]>
-<html lang="en" class="ie8 no-js" data-ng-app="GISMapFrontendApp"> <![endif]-->
+<html lang="en" class="ie8 no-js" data-ng-app="<%= projectName %>App"> <![endif]-->
 <!--[if IE 9]>
-<html lang="en" class="ie9 no-js" data-ng-app="GISMapFrontendApp"> <![endif]-->
+<html lang="en" class="ie9 no-js" data-ng-app="<%= projectName %>App"> <![endif]-->
 <!--[if !IE]><!-->
-<html lang="en" data-ng-app="GISMapFrontendApp">
+<html lang="en" data-ng-app="<%= projectName %>App">
 <!--<![endif]-->
 <!-- BEGIN HEAD -->
 
@@ -21,7 +21,12 @@
         name="viewport"/>
     <meta content="南京汉图地图平台" name="description"/>
     <meta content="汉图-新技术研发中心" name="author"/>
-
+    <!-- HTTP 1.1 -->
+    <meta http-equiv="pragma" content="no-cache">
+    <!-- HTTP 1.0 -->
+    <meta http-equiv="cache-control" content="no-cache">
+    <!-- Prevent caching at the proxy server -->
+    <meta http-equiv="expires" content="0">
     <!-- inject:css -->
     <!-- inject:css:here -->
     <!-- endinject -->

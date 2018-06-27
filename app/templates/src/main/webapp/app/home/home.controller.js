@@ -2,12 +2,12 @@
     'use strict';
 
     angular
-        .module('GISMapFrontendApp')
+        .module('<%= projectName %>App')
         .controller('HomeController', HomeController);
 
-    HomeController.$inject = ['$scope', '$state', '$stomp', '$resource', 'APP_CONSTANT', '$timeout'];
+    HomeController.$inject = ['$scope', '$state', '$resource', 'APP_CONSTANT'];
 
-    function HomeController($scope, $state, $stomp, $resource, APP_CONSTANT, $timeout) {
+    function HomeController($scope, $state, $resource, APP_CONSTANT) {
         var vm = this;
         vm.constant = "#/tp?apikey=" + APP_CONSTANT.API_KEY + "&state=";
         var all_modules = {

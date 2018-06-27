@@ -13,7 +13,8 @@
     angular.module("<%= projectName %>App", [
         'HMBaseApp'<%if (isIncludeDatatable) {%>,
         'datatables'<%} if(isIncludeWS){%>,
-        'ngStomp'<%}%>
+        'ngStomp'<%} if(isIncludeAB){%>,
+        'ui.bootstrap'<%}%>
     ]);
 
 })();
