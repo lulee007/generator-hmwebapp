@@ -1,6 +1,6 @@
 {
   "name": "generator-hmwebapp",
-  "version": "1.0.1",
+  "version": "2.1",
   "description": "Scaffold out a front-end web app",
   "license": "BSD-2-Clause",
   "repository": "yeoman/generator-webapp",
