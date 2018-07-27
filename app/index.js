@@ -81,7 +81,7 @@ module.exports = class extends Generator {
     this._writingGulpfile();
     this._writingPackageJSON();
     this._writingBower();
-    this._writingEditorConfig();
+    this._writingProjectConfigs();
     this._writingPom();
     this._writingAssets();
     this._writingScripts();
@@ -125,16 +125,28 @@ module.exports = class extends Generator {
         isIncludeDatatable:this.hasFeature('includeDatatable'),
         isIncludeAB:this.hasFeature('isIncludeAB')
       });
+  }
+
+  _writingProjectConfigs() {
+    this.fs.copy(
+      this.templatePath('editorconfig'),
+      this.destinationPath('.editorconfig')
+    );
+    this.fs.copy(
+      this.templatePath('eslintignore'),
+      this.destinationPath('.eslintignore')
+    );
+    this.fs.copy(
+      this.templatePath('eslintrc.json'),
+      this.destinationPath('eslintrc.json')
+    );
     this.fs.copy(
       this.templatePath('bowerrc'),
       this.destinationPath('.bowerrc')
     );
-  }
-
-  _writingEditorConfig() {
     this.fs.copy(
-      this.templatePath('editorconfig'),
-      this.destinationPath('.editorconfig')
+      this.templatePath('npmrc'),
+      this.destinationPath('.npmrc')
     );
   }
 
