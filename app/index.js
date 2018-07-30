@@ -18,9 +18,9 @@ module.exports = class extends Generator {
       type: Boolean
     });
 
-    this.option('debug',{
-      desc:'开发调试模式',
-      type:Boolean
+    this.option('debug', {
+      desc: '开发调试模式',
+      type: Boolean
     });
     this.templateSrcPath = 'src/main/webapp/';
 
@@ -60,11 +60,17 @@ module.exports = class extends Generator {
           name: 'Datatable',
           value: 'includeDatatable',
           checked: true
-        },{
-          name:'Angular Bootstrap',
+        }, {
+          name: 'Angular Bootstrap',
           value: 'isIncludeAB',
           checked: false
-        }]
+        }, {
+          name: 'Angular RxJS',
+          value: 'isIncludeRxJS',
+          checked: true
+        },
+
+        ]
       }];
 
     return this.prompt(prompts).then(answers => {
@@ -79,6 +85,7 @@ module.exports = class extends Generator {
 
   writing() {
     this._writingGulpfile();
+    this._writingGulpConfig();
     this._writingPackageJSON();
     this._writingBower();
     this._writingProjectConfigs();
@@ -101,17 +108,21 @@ module.exports = class extends Generator {
         version: this.pkg.version
       }
     );
-    this.fs.copy(
+    this.fs.copyTpl(
       this.templatePath('gulp'),
-      this.destinationPath('gulp')
+      this.destinationPath('gulp'),
+      {
+        projectName: this.getKebabCase(this.build.projectName)
+      }
     );
   }
+
 
   _writingPackageJSON() {
     this.fs.copyTpl(
       this.templatePath('_package.json'),
       this.destinationPath('package.json'),
-      {appname:this.build.projectName}
+      { appname: this.build.projectName }
     );
   }
 
@@ -121,9 +132,10 @@ module.exports = class extends Generator {
       this.destinationPath('bower.json'),
       {
         projectName: this.build.projectName,
-        isIncludeWS:this.hasFeature('includeWebsocket'),
-        isIncludeDatatable:this.hasFeature('includeDatatable'),
-        isIncludeAB:this.hasFeature('isIncludeAB')
+        isIncludeWS: this.hasFeature('includeWebsocket'),
+        isIncludeDatatable: this.hasFeature('includeDatatable'),
+        isIncludeAB: this.hasFeature('isIncludeAB'),
+        isIncludeRxJS: this.hasFeature('isIncludeRxJS')
       });
   }
 
@@ -150,24 +162,14 @@ module.exports = class extends Generator {
     );
   }
 
-  _writingPom(){
-    function getKebabCase ( str ) {
-      var arr = str.split('');
-         str = arr.map(function ( item ){
-             if( item.toUpperCase() === item ){
-                 return '-' + item.toLowerCase();
-             }else{
-                 return item;
-             }
-         }).join( '' );
-         return str.substring(1);
-     }
+  _writingPom() {
+
     this.fs.copyTpl(
       this.templatePath('pom.xml'),
       this.destinationPath('pom.xml'),
       {
         groupId: this.build.projectGroupID,
-        projectName: getKebabCase(this.build.projectName)
+        projectName: this.getKebabCase(this.build.projectName)
       }
     )
   }
@@ -175,46 +177,47 @@ module.exports = class extends Generator {
   _writingAssets() {
     // 拷贝 资源文件
     this.fs.copy(
-      this.templatePath(this.templateSrcPath+'assets'),
-      this.destinationPath(this.templateSrcPath+'assets')
+      this.templatePath(this.templateSrcPath + 'assets'),
+      this.destinationPath(this.templateSrcPath + 'assets')
     );
   }
 
   _writingAssets() {
     // 拷贝 资源文件
     this.fs.copy(
-      this.templatePath(this.templateSrcPath+'assets'),
-      this.destinationPath(this.templateSrcPath+'assets')
+      this.templatePath(this.templateSrcPath + 'assets'),
+      this.destinationPath(this.templateSrcPath + 'assets')
     );
   }
 
   _writingScripts() {
     this.fs.copyTpl(
-      this.templatePath(this.templateSrcPath+ 'app/'),
-      this.destinationPath(this.templateSrcPath+'app/'),
+      this.templatePath(this.templateSrcPath + 'app/'),
+      this.destinationPath(this.templateSrcPath + 'app/'),
       {
         projectName: this.build.projectName,
-        isIncludeWS:this.hasFeature('includeWebsocket'),
-        isIncludeDatatable:this.hasFeature('includeDatatable'),
-        isIncludeAB:this.hasFeature('isIncludeAB')
+        isIncludeWS: this.hasFeature('includeWebsocket'),
+        isIncludeDatatable: this.hasFeature('includeDatatable'),
+        isIncludeAB: this.hasFeature('isIncludeAB'),
+        isIncludeRxJS: this.hasFeature('isIncludeRxJS')
       }
     );
   }
 
   _writingIndex() {
     this.fs.copyTpl(
-      this.templatePath(this.templateSrcPath+ 'template/'),
-      this.destinationPath(this.templateSrcPath+'template/'),
+      this.templatePath(this.templateSrcPath + 'template/'),
+      this.destinationPath(this.templateSrcPath + 'template/'),
       {
         projectName: this.build.projectName
       }
     );
   }
 
-  _writingWeb_INF(){
+  _writingWeb_INF() {
     this.fs.copyTpl(
-      this.templatePath(this.templateSrcPath+ 'WEB-INF/'),
-      this.destinationPath(this.templateSrcPath+'WEB-INF/')
+      this.templatePath(this.templateSrcPath + 'WEB-INF/'),
+      this.destinationPath(this.templateSrcPath + 'WEB-INF/')
     );
   }
 
@@ -225,29 +228,39 @@ module.exports = class extends Generator {
     );
   }
 
+  getKebabCase(str) {
+    var arr = str.split('');
+    str = arr.map(function (item) {
+      if (item.toUpperCase() === item) {
+        return '-' + item.toLowerCase();
+      } else {
+        return item;
+      }
+    }).join('');
+    return str.substring(1);
+  }
+
   install() {
-    if(this.options['debug']){
+    if (this.options['debug']) {
       console.log('调试模式，无需安装');
-      return ;
+      return;
     }
     const hasYarn = commandExists('yarn');
     this.installDependencies({
       npm: !hasYarn,
       bower: true,
       yarn: hasYarn,
-      skipMessage: this.options['skip-install-message'],
       skipInstall: this.options['skip-install']
     });
   }
 
   end() {
-    if(this.options['debug']){
-      console.log('调试模式，取消');
-      return ;
+    if (this.options['debug']) {
+      console.log('调试模式，不进行安装');
+      return;
     }
     const howToInstall = `
-After running ${chalk.yellow.bold('npm install & bower install')}, inject your
-front end dependencies by running ${chalk.yellow.bold('gulp wiredep')}.`;
+运行 ${chalk.yellow.bold('npm install & bower install')} 之后, 运行项目使用： ${chalk.yellow.bold('gulp --port=xxx --pages=yyy')}.`;
 
     if (this.options['skip-install']) {
       this.log(howToInstall);

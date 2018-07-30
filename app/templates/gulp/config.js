@@ -1,4 +1,6 @@
 'use strict';
+var process = require('process');
+var cwd = process.cwd();
 
 module.exports = {
     version: '1.0.0',
@@ -9,5 +11,7 @@ module.exports = {
     tmp: 'src/main/tmp/',
     revManifest: 'src/main/tmp/rev-manifest.json',
     webTargetDir: 'target/',
-    port: 9000
+    port: 9000,
+    gulpDir: cwd + '/gulp/',
+    projectName : '<%= projectName %>'
 };

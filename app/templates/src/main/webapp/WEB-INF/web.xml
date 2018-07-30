@@ -9,11 +9,11 @@
         <servlet-class>com.handsmap.http.reverseproxy.URITemplateProxyServlet</servlet-class>
         <init-param>
             <param-name>targetUri</param-name>
-            <!--<param-value>http://192.168.8.116:8888</param-value>-->
+            <param-value>http://192.168.8.116:8888</param-value>
             <!--部署时访问的服务器gateway地址-->
             <!--<param-value>http://dev.handsmap.com:8888</param-value>-->
             <!--测试库 gateway 地址-->
-            <param-value>http://192.168.8.162:8888</param-value>
+            <!-- <param-value>http://192.168.8.162:8888</param-value> -->
         </init-param>
         <init-param>
             <param-name>log</param-name>
@@ -35,7 +35,7 @@
         <init-param>
             <param-name>secondaryPath</param-name>
             <!--部署时需要转发的系统，比如：游览车、微信、客流-->
-            <param-value>api,hmdataplatformmysql,simsgisscenicmap,tlvehicle,wxservice,mspassengerflow</param-value>
+            <param-value>api,__SERVER1__</param-value>
         </init-param>
     </filter>
     <filter-mapping>

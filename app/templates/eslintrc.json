@@ -11,7 +11,8 @@
       "hmgeolocation": true,
       "Howl": true,
       "VConsole": true,
-      "Terraformer": true
+      "Terraformer": true,
+      "Handsmap": true
   },
   "ignore": [
       "./gulpfile.js"

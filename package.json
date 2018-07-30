@@ -1,10 +1,10 @@
 {
   "name": "generator-hmwebapp",
-  "version": "2.2",
-  "description": "Scaffold out a front-end web app",
+  "version": "2.2.1",
+  "description": "汉图研发部地图平台前端脚手架",
   "license": "BSD-2-Clause",
   "repository": "yeoman/generator-webapp",
-  "author": "HM NTRDC Team",
+  "author": "汉图研发部前端",
   "main": "app/index.js",
   "engines": {
     "node": ">=4"
