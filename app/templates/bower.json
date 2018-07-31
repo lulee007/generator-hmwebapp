@@ -4,6 +4,8 @@
   "appPath": "src/main/webapp/",
   "testPath": "src/test/javascript/spec",
   "dependencies": {
+    "handsmap_amap": "svn+https://dev.handsmap.com:2086/svn/Project_HandsmapDev_Daily/handsmap_amap#>=0.1.2",
+    "handsmap_olmap": "svn+https://dev.handsmap.com:2086/svn/Project_HandsmapDev_Daily/handsmap_olmap#>=0.1.2",
     "hm-angularjs-base": "svn+https://dev.handsmap.com:2086/svn/Project_HandsmapDev_Daily/hm-angularjs-base#>=0.1.2"
     <% if (isIncludeDatatable){%>,
     "datatables.net": "^1.10.15",
