@@ -15,4 +15,4 @@
            TP_STATE_WHITE_LIST:[''],
            // API_HOST:''
        });
-})();
+}());

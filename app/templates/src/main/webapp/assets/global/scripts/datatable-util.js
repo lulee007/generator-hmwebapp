@@ -75,4 +75,4 @@ var DataTableUtil = (function () {
             type: "GET"
         });
     }
-})();
+}());

@@ -22,4 +22,4 @@
 
         return {service:service,view:view};
     }
-})();
+}());
