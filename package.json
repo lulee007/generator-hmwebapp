@@ -1,9 +1,9 @@
 {
   "name": "generator-hmwebapp",
-  "version": "2.2.2",
+  "version": "2.2.4",
   "description": "汉图研发部地图平台前端脚手架",
   "license": "BSD-2-Clause",
-  "repository": "yeoman/generator-webapp",
+  "repository": "https://github.com/lulee007/generator-hmwebapp",
   "author": "汉图研发部前端",
   "main": "app/index.js",
   "engines": {
