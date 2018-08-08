@@ -85,7 +85,6 @@ module.exports = class extends Generator {
 
   writing() {
     this._writingGulpfile();
-    this._writingGulpConfig();
     this._writingPackageJSON();
     this._writingBower();
     this._writingProjectConfigs();
@@ -99,6 +98,7 @@ module.exports = class extends Generator {
   }
 
   _writingGulpfile() {
+    console.log(this._getKebabCase,this.build.projectName);
     this.fs.copyTpl(
       this.templatePath('gulpfile.js'),
       this.destinationPath('gulpfile.js'),
@@ -112,7 +112,7 @@ module.exports = class extends Generator {
       this.templatePath('gulp'),
       this.destinationPath('gulp'),
       {
-        projectName: this.getKebabCase(this.build.projectName)
+        projectName: this._getKebabCase(this.build.projectName)
       }
     );
   }
@@ -169,17 +169,9 @@ module.exports = class extends Generator {
       this.destinationPath('pom.xml'),
       {
         groupId: this.build.projectGroupID,
-        projectName: this.getKebabCase(this.build.projectName)
+        projectName: this._getKebabCase(this.build.projectName)
       }
     )
-  }
-
-  _writingAssets() {
-    // 拷贝 资源文件
-    this.fs.copy(
-      this.templatePath(this.templateSrcPath + 'assets'),
-      this.destinationPath(this.templateSrcPath + 'assets')
-    );
   }
 
   _writingAssets() {
@@ -228,7 +220,7 @@ module.exports = class extends Generator {
     );
   }
 
-  getKebabCase(str) {
+  _getKebabCase(str) {
     var arr = str.split('');
     str = arr.map(function (item) {
       if (item.toUpperCase() === item) {
