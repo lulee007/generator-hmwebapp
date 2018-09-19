@@ -5,14 +5,17 @@
 (function () {
     'use strict';
 
-    angular.module('HMBaseApp')
+    angular.module('HMBaseMap')
         .constant('APP_CONSTANT', {
-            STORAGE_PREFIX:'<%= projectName %>App'
+            STORAGE_PREFIX:'<%= projectName %>App',
+            DEBUG_INFO_ENABLED: true
         });
     /* <%= projectName %>App */
     angular
     .module("<%= projectName %>App", [
-        'HMBaseApp'
+        'HMBaseMapFrontend',
+        // 'ngHmMapApi.holistic',
+        // 'ngHmMapApi.scenic',
     ])
     .config(['$ocLazyLoadProvider', 'APP_CONSTANT', function ($ocLazyLoadProvider, APP_CONSTANT) {
         $ocLazyLoadProvider.config({
@@ -46,5 +49,8 @@
             ]
         });
     }])
+    .run(['BaseMapService','APP_CONSTANT',function (BaseMapService,APP_CONSTANT) {
+        BaseMapService.setAPIHost(APP_CONSTANT.API_HOST);
 
+    }])
 }());

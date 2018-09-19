@@ -1,16 +1,25 @@
 {
     "extends": [
-        "eslint:recommended"
+        "eslint:recommended",
+        "angular"
     ],
     "globals": {
-        
+        "HMAMap": true,
+        "HandsMap":true,
+        "ol":true,
+        "AMap": true,
+        "hmgeolocation": true,
+        "Howl": true,
+        "VConsole": true,
+        "Terraformer": true,
+        "$":true
     },
     "env": {
-        "node": true
+        "browser": true
     },
   
     "rules": {
-      
+      "angular/di": 0,
         "wrap-iife": [
             2,
             "inside"
@@ -34,6 +43,7 @@
             "always"
         ],
         "indent": 2,
+        "angular/log": 0,
         "no-console": 0,
         "linebreak-style": 0,
         "eol-last": 2
